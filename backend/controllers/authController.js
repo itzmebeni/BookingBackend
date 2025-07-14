@@ -18,7 +18,7 @@ const register = async (req, res) => {
     if (existingUser) return res.status(400).json({ message: 'Username already exists.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword });
+    const newUser = new User({ username, password: hashedPassword, name: username, });
     await newUser.save();
 
     res.status(201).json({ message: 'Signup successful' });
@@ -112,5 +112,19 @@ const loginWithGoogle = async (req, res) => {
   }
 };
 
+// Get User Profile Info
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('username email name');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
 
-module.exports = { register, login, googleAuth };
+
+
+module.exports = { register, login, googleAuth, loginWithGoogle, getUserProfile };
